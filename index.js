@@ -1,13 +1,23 @@
+
+
 const fs = require("fs");
 const loader = require("@assemblyscript/loader");
 const imports = { /* imports go here */ };
 const wasmModule = loader.instantiateSync(fs.readFileSync(__dirname + "/build/optimized.wasm"), imports);
 module.exports = wasmModule.exports;
+// Get our memory object from the exports
+const memory = module.exports.memory;
+// Create a shared Uint8Array. It can be accessed from both of Wasm and JS.
+const wasmByteMemoryArray = new Uint8Array(memory.buffer);
+
+const countFirstAxisData = require('./index').countFirstAxisData;
+
 
 
 
 const SerialPort = require('serialport');
 const ByteLength = require('@serialport/parser-byte-length');
+let numberOfData = 0;
 
 const port = new SerialPort('/dev/cu.usbserial-0001', {
     baudRate: 9600,
@@ -50,10 +60,17 @@ const serial_read = function() {
         //TODO: Implement: Just give data to Wasm Module (then, Wasm Module filters bytes).
         parser.on('data', function (data){
             let value=data
-            //Slice 1st Byte
-            let axisNumber = value.slice(0,1)
-            //readUInt converts buffer to uint8
-            console.log(axisNumber.readUInt8(0))
+
+            for(let i = numberOfData; i<value.length+numberOfData; i++){
+                wasmByteMemoryArray[i] = value[i]
+            }
+
+            //Remember the amount of the data
+            numberOfData++
+            if(numberOfData>=3 ){
+                console.log(countFirstAxisData(numberOfData))
+                numberOfData = 0
+            }
         })
     })
 

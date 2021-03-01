@@ -68,12 +68,53 @@ const serial_read = function() {
             //Remember the amount of the data
             numberOfData++
             if(numberOfData>=3 ){
-                console.log(countFirstAxisData(numberOfData))
+                mqtt_publish(countFirstAxisData(numberOfData))
                 numberOfData = 0
             }
         })
     })
 
+}
+
+
+//MQTT
+const mqtt = require('mqtt')
+const topic = 'topic'
+const client  = mqtt.connect('mqtt://localhost');
+// https://www.emqx.io/mqtt/public-mqtt5-broker
+//const client = mqtt.connect('mqtt://broker.emqx.io');
+
+//Subscribe the broker
+client.on('connect', function () {
+    client.subscribe(topic, function (err) {
+        if (!err) {
+            console.log('Connected')
+        }
+    })
+})
+
+//Listening messages from the broker
+client.on('message', function (topic, message) {
+    // message is Buffer
+    console.log(message.toString())
+    if(message.toString()==='EndConnection'){
+        client.end()
+    }
+});
+
+//Display Errors
+client.on('error', function(err) {
+    console.dir(err)
+})
+
+const mqtt_publish = function (msg){
+
+    //Check the connection
+    if(!client.connected){
+        client.reconnect()
+    }
+    client.publish(topic, 'Test: ')
+    client.publish(topic, msg.toString())
 }
 
 serial_read()

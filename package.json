@@ -7,7 +7,10 @@
     "test": "node tests",
     "asbuild:untouched": "asc assembly/index.ts --target debug",
     "asbuild:optimized": "asc assembly/index.ts --target release",
-    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized"
+    "asbuild:untouched-bind": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --runtime incremental --exportRuntime --target debug",
+    "asbuild:optimized-bind": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --runtime incremental --exportRuntime --target release",
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",
+    "asbuild-bind": "npm run asbuild:untouched-bind && npm run asbuild:optimized-bind"
   },
   "repository": {
     "type": "git",
@@ -21,6 +24,7 @@
   "homepage": "https://github.com/internet-of-production/WasmRetrofittingNode#readme",
   "dependencies": {
     "@assemblyscript/loader": "^0.18.11",
+    "as-bind": "^0.6.1",
     "mqtt": "^4.2.6",
     "serialport": "^9.0.7"
   },

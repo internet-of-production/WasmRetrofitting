@@ -1,10 +1,14 @@
 
+const {AsBind} = require("as-bind");
 
 const fs = require("fs");
-const loader = require("@assemblyscript/loader");
+//const loader = require("@assemblyscript/loader");
 const imports = { /* imports go here */ };
-const wasmModule = loader.instantiateSync(fs.readFileSync(__dirname + "/build/optimized.wasm"), imports);
+//const wasmModule = loader.instantiateSync(fs.readFileSync(__dirname + "/build/optimized.wasm"), imports);
+
+const wasmModule = AsBind.instantiateSync(fs.readFileSync(__dirname + "/build/optimized.wasm"), imports);
 module.exports = wasmModule.exports;
+
 // Get our memory object from the exports
 const memory = module.exports.memory;
 // Create a shared Uint8Array. It can be accessed from both of Wasm and JS.
@@ -114,7 +118,7 @@ const mqtt_publish = function (msg){
         client.reconnect()
     }
     client.publish(topic, 'Test: ')
-    client.publish(topic, msg.toString())
+    client.publish(topic, msg)
 }
 
 serial_read()

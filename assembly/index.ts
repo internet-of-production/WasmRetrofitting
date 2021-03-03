@@ -11,7 +11,7 @@ export function add(a: i32, b: i32): i32 {
 
 //It counts the number of data of Axis 1.
 //1st byte is the id of axes.
-export function countFirstAxisData(numberOfData:i32):i32{
+export function countFirstAxisData(numberOfData:i32):string{
   let counter:i32 = 0;
   for(let i:i32 = 0; i<numberOfData*AXIS_DATA_LENGTH; i=i+AXIS_DATA_LENGTH){
 
@@ -21,5 +21,7 @@ export function countFirstAxisData(numberOfData:i32):i32{
     }
   }
 
-  return counter;
+  let result:string = "{" + counter.toString() + "}"
+
+  return result;
 }

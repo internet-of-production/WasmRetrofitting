@@ -14,7 +14,8 @@ const memory = module.exports.memory;
 // Create a shared Uint8Array. It can be accessed from both of Wasm and JS.
 const wasmByteMemoryArray = new Uint8Array(memory.buffer);
 
-const countFirstAxisData = require('./index').countFirstAxisData;
+//const countFirstAxisData = require('./index').countFirstAxisData;
+const JsonEncoderWasm = require('./index').JsonEncoderWasm;
 
 
 
@@ -61,20 +62,17 @@ const serial_read = function() {
             }
         })
 
-        //TODO: Implement: Just give data to Wasm Module (then, Wasm Module filters bytes).
+
         parser.on('data', function (data){
             let value=data
 
-            for(let i = numberOfData; i<value.length+numberOfData; i++){
-                wasmByteMemoryArray[i] = value[i]
+            const dataArray = new Uint8Array(value)
+            const jsonData = JsonEncoderWasm(dataArray)
+
+            if(jsonData.length>1){
+                mqtt_publish(jsonData)
             }
 
-            //Remember the amount of the data
-            numberOfData++
-            if(numberOfData>=3 ){
-                mqtt_publish(countFirstAxisData(numberOfData))
-                numberOfData = 0
-            }
         })
     })
 

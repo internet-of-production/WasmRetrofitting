@@ -64,9 +64,7 @@ const serial_read = function() {
 
 
         parser.on('data', function (data){
-            let value=data
-
-            const dataArray = new Uint8Array(value)
+            const dataArray = new Uint8Array(data)
             const jsonData = JsonEncoderWasm(dataArray)
 
             if(jsonData.length>1){
@@ -81,8 +79,16 @@ const serial_read = function() {
 
 //MQTT
 const mqtt = require('mqtt')
-const topic = 'topic'
-const client  = mqtt.connect('mqtt://localhost');
+const topic = 'KUKA'
+const options = {
+    clientId:"wasmNode",
+    port:1883,
+    host:"localhost",
+    username:"wasmretrofitting",
+    password:"wasmretrofitting",
+    reconnectPeriod:1000
+}
+const client  = mqtt.connect(options);
 // https://www.emqx.io/mqtt/public-mqtt5-broker
 //const client = mqtt.connect('mqtt://broker.emqx.io');
 

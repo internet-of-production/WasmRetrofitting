@@ -1,4 +1,3 @@
-
 const {AsBind} = require("as-bind");
 
 const fs = require("fs");
@@ -12,10 +11,15 @@ module.exports = wasmModule.exports;
 // Get our memory object from the exports
 const memory = module.exports.memory;
 // Create a shared Uint8Array. It can be accessed from both of Wasm and JS.
-const wasmByteMemoryArray = new Uint8Array(memory.buffer);
+//const wasmByteMemoryArray = new Uint8Array(memory.buffer);
 
 //const countFirstAxisData = require('./index').countFirstAxisData;
 const JsonEncoderWasm = require('./index').JsonEncoderWasm;
+const JsonEncoderString = require('./index').JsonEncoderString;
+const setAxisData = require('./index').setAxisData;
+const getDistance = require('./index').distance;
+const isUnsafe = require('./index').isUnsafe;
+const getTipCoordinate = require('./index').getTipCoordinate;
 
 
 
@@ -66,6 +70,14 @@ const serial_read = function() {
         parser.on('data', function (data){
             const dataArray = new Uint8Array(data)
             const jsonData = JsonEncoderWasm(dataArray)
+            let number = setAxisData(dataArray)
+            if(number==7){
+                console.log(getDistance())
+                console.log(isUnsafe())
+            }
+            else {
+                console.log(number)
+            }
 
             if(jsonData.length>1){
                 mqtt_publish(jsonData)

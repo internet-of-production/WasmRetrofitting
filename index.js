@@ -1,6 +1,11 @@
 const {AsBind} = require("as-bind");
-
 const fs = require("fs");
+var path = require('path')
+
+var KEY = fs.readFileSync(__dirname +'/secret/server.key')
+var CERT = fs.readFileSync(__dirname +'/secret/server.crt')
+var TRUSTED_CA_LIST = fs.readFileSync(__dirname +'/secret/ca.crt')
+
 //const loader = require("@assemblyscript/loader");
 const imports = { /* imports go here */ };
 //const wasmModule = loader.instantiateSync(fs.readFileSync(__dirname + "/build/optimized.wasm"), imports);
@@ -94,10 +99,14 @@ const mqtt = require('mqtt')
 const topic = 'KUKA'
 const options = {
     clientId:"wasmNode",
-    port:1883,
+    port:8883,
     host:"localhost",
     username:"wasmretrofitting",
     password:"wasmretrofitting",
+    key:KEY,
+    cert: CERT,
+    ca: TRUSTED_CA_LIST,
+    protocol: 'mqtts',
     reconnectPeriod:1000
 }
 const client  = mqtt.connect(options);

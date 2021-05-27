@@ -20,7 +20,6 @@ const memory = module.exports.memory;
 
 //const countFirstAxisData = require('./index').countFirstAxisData;
 const JsonEncoderWasm = require('./index').JsonEncoderWasm;
-const JsonEncoderString = require('./index').JsonEncoderString;
 const setAxisData = require('./index').setAxisData;
 const getDistance = require('./index').distance;
 const isUnsafe = require('./index').isUnsafe;
@@ -31,7 +30,6 @@ const getTipCoordinate = require('./index').getTipCoordinate;
 
 const SerialPort = require('serialport');
 const ByteLength = require('@serialport/parser-byte-length');
-let numberOfData = 0;
 
 const port = new SerialPort('/dev/cu.usbserial-0001', {
     baudRate: 9600,
@@ -80,8 +78,8 @@ const serial_read = function() {
                 console.log(getDistance())
                 console.log(isUnsafe())
             }
-            else {
-                console.log(number)
+            else if(number == 0){
+                console.log('Error: Received data is invalid')
             }
 
             if(jsonData.length>1){
@@ -99,14 +97,14 @@ const mqtt = require('mqtt')
 const topic = 'KUKA'
 const options = {
     clientId:"wasmNode",
-    port:8883,
+    port:1883,
     host:"localhost",
     username:"wasmretrofitting",
     password:"wasmretrofitting",
-    key:KEY,
+    /*key:KEY,
     cert: CERT,
-    ca: TRUSTED_CA_LIST,
-    protocol: 'mqtts',
+    ca: TRUSTED_CA_LIST,*/
+    protocol: 'mqtt',
     reconnectPeriod:1000
 }
 const client  = mqtt.connect(options);

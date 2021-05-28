@@ -90,11 +90,9 @@ function matrixMultiplication(matrix1:Array<Array<f64>>,matrix2:Array<Array<f64>
     return result
 }
 function calcTipCoordinate():Array<f64>{
-    //TODO: Calculate T01*T12*T23*T34*T45*tipFromA5
-    let initArray:Array<f64> = [0, 0, 0, 0]
+    //Calculate T01*T12*T23*T34*T45*tipFromA5
     let coordinate:Array<f64> = [0, 0, 0, 0]
-    let storeMatrix:Array<Array<f64>> = [initArray.slice(0),initArray.slice(0),initArray.slice(0),initArray.slice(0)]
-    storeMatrix = matrixMultiplication(T01,T12).slice(0)
+    let storeMatrix = matrixMultiplication(T01,T12).slice(0)
     storeMatrix = matrixMultiplication(storeMatrix,T23).slice(0)
     storeMatrix = matrixMultiplication(storeMatrix,T34).slice(0)
     storeMatrix = matrixMultiplication(storeMatrix,T45).slice(0)
@@ -128,10 +126,7 @@ export function calcDistance(axes:Array<f64>):f64 {
 For max_robot_speed = 1 (mm/ms), D = 3569.2 mm
 */
 export function isCollisionDetected():bool{
-    if(distance<SAFETY_DISTANCE){
-        return true
-    }
-    return false
+    return distance<SAFETY_DISTANCE
 }
 
 export function getTip():f64{

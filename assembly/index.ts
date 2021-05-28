@@ -16,11 +16,11 @@ let axesJsonCounter = 0
 let storeDistance:f64 = 0
 const emptyUint8Array = new Uint8Array(1)
 
+let mqttOptionJSON:string = "{\"clientId\":\"wasmNode\",\"port\":1883,\"host\":\"localhost\",\"username\":\"wasmretrofitting\",\"password\":\"wasmretrofitting\",\"protocol\": \"mqtt\",\"reconnectPeriod\":1000}"
 
-export function add(a: i32, b: i32): i32 {
-  return a + b;
+export function getMQTTOptions():string{
+  return mqttOptionJSON
 }
-
 
 //KRC2 sends bytes in the little endian
 function convertNumber(dataArray:Uint8Array,offset:i32):i32{

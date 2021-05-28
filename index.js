@@ -22,7 +22,7 @@ const JsonEncoderWasm = require('./index').JsonEncoderWasm;
 const setAxisData = require('./index').setAxisData;
 const getDistance = require('./index').getDistance;
 const isUnsafe = require('./index').isUnsafe;
-const getTipCoordinate = require('./index').getTipCoordinate;
+const getMQTTOptions = require('./index').getMQTTOptions;
 
 
 
@@ -95,17 +95,18 @@ const serial_read = function() {
 //MQTT
 const mqtt = require('mqtt')
 const topic = 'KUKA'
+const optionJSON = JSON.parse(getMQTTOptions())
 const options = {
-    clientId:"wasmNode",
-    port:1883,
-    host:"localhost",
-    username:"wasmretrofitting",
-    password:"wasmretrofitting",
+    clientId:optionJSON.clientId,
+    port:optionJSON.port,
+    host:optionJSON.host,
+    username:optionJSON.username,
+    password:optionJSON.password,
     /*key:KEY,
     cert: CERT,
     ca: TRUSTED_CA_LIST,*/
-    protocol: 'mqtt',
-    reconnectPeriod:1000
+    protocol: optionJSON.protocol,
+    reconnectPeriod:optionJSON.reconnectPeriod
 }
 const client  = mqtt.connect(options);
 // https://www.emqx.io/mqtt/public-mqtt5-broker

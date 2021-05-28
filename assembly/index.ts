@@ -8,12 +8,15 @@ const AXIS_DATA_LENGTH = 9;
 const AXIS_NUMBER_LENGTH = 4;
 const INVALID_VALUE:f64 = 1000000;
 const ALL_DATA_PRESENT = 7;
+const INVALID_DATA_SIGN = -1;
 //values of axis
 let axesArray:Array<f64> = [0,0,0,0,0,0,0]
 let jsonArray:Array<f64> = [0,0,0,0,0,0,0]
 let axesDataCounter = 0
 let axesJsonCounter = 0
 let storeDistance:f64 = 0
+let errorFreeJson:bool = true
+let errorFreeData:bool = true
 const emptyUint8Array = new Uint8Array(1)
 
 let mqttOptionJSON:string = "{\"clientId\":\"wasmNode\",\"port\":1883,\"host\":\"localhost\",\"username\":\"wasmretrofitting\",\"password\":\"wasmretrofitting\",\"protocol\": \"mqtt\",\"reconnectPeriod\":1000}"
@@ -33,7 +36,7 @@ function convertNumber(dataArray:Uint8Array,offset:i32):i32{
 }
 
 
-function checkAxisValue(number:i32, value:f64):bool{
+function isAxisValueValid(number:i32, value:f64):bool{
 
   switch (number) {
     case 1:
@@ -70,29 +73,36 @@ function checkAxesArray(array:Array<f64>):bool{
 //1st byte is the id of axes. It returns the value in the JSON format.
 export function JsonEncoderWasm(dataArray:Uint8Array):Uint8Array{
 
+  axesJsonCounter++
+
+  if(!errorFreeJson){
+    if(axesJsonCounter == 7){
+      axesJsonCounter = 0
+      errorFreeJson = true
+    }
+    return emptyUint8Array
+  }
+
   let axisNumber:i32 = convertNumber(dataArray,0)
   //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
   let axisValue:f64 = convertNumber(dataArray,5)
 
-  axesJsonCounter++
+  if(axisNumber<1 || axisNumber>7 || !isAxisValueValid(axisNumber,axisValue)){
 
-  if(axisNumber<0 || axisNumber>7){
-    jsonArray[0] = INVALID_VALUE
-  }
-
-  if(axesJsonCounter!= 7){
-    if(checkAxisValue(axisNumber,axisValue)){
-      jsonArray[axisNumber-1] = axisValue
+    if(axesJsonCounter == 7){
+      axesJsonCounter = 0
     }
     else{
-      for(let i=0; i<axesArray.length; i++){
-        jsonArray[i] = INVALID_VALUE
-      }
+      errorFreeJson = false
     }
     return emptyUint8Array
   }
   else{
-    if(checkAxisValue(axisNumber,axisValue) && checkAxesArray(jsonArray)){
+    if(axesJsonCounter != 7){
+      jsonArray[axisNumber-1] = axisValue
+      return emptyUint8Array
+    }
+    else{
       jsonArray[axisNumber-1] = axisValue
 
       let jsonEncoder = new JSONEncoder()
@@ -105,58 +115,59 @@ export function JsonEncoderWasm(dataArray:Uint8Array):Uint8Array{
       axesJsonCounter=0
       let result:Uint8Array = jsonEncoder.serialize()
       return result
-
-    }
-    else{
-      axesJsonCounter=0
-      return emptyUint8Array
     }
   }
+
 }
 
 
+/*
+  Reverse positive and negative angles to copy them in coordinate system.
+  It assumes that the robot's base stands on the ground, and the initial position of the tip is positive (on the x-y plane).
+  Therefore, the clockwise rotation is negative, the counterclockwise is positive, but KUKA robots outputs the opposite
+  */
 export function setAxisData(dataArray:Uint8Array):i32{
+
+  axesDataCounter++
+
+  if(!errorFreeData){
+    if(axesDataCounter == 7){
+      axesDataCounter = 0
+      errorFreeData = true
+      return INVALID_DATA_SIGN
+    }
+    else{
+      return axesDataCounter
+    }
+  }
 
   let axisNumber:i32 = convertNumber(dataArray,0)
   //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
   let axisValue:f64 = convertNumber(dataArray,5) //For Test
 
-  axesDataCounter++
 
-  if(axisNumber<0 || axisNumber>7){
-    for(let i=0; i<axesArray.length; i++){
-      axesArray[i] = INVALID_VALUE
-    }
-    return axesDataCounter
-  }
+  if(axisNumber<1 || axisNumber>7 || !isAxisValueValid(axisNumber,axisValue)){
 
-  /*
-  Reverse positive and negative angles to copy them in coordinate system.
-  It assumes that the robot's base stands on the ground, and the initial position of the tip is positive (on the x-y plane).
-  Therefore, the clockwise rotation is negative, the counterclockwise is positive, but KUKA robots outputs the opposite
-  */
-  if(axesDataCounter != 7){
-    if(checkAxisValue(axisNumber,axisValue)){
-      axesArray[axisNumber-1] = - axisValue //reverse the sign because of
+    if(axesDataCounter == 7){
+      axesDataCounter = 0
+      return INVALID_DATA_SIGN
     }
     else{
-      for(let i=0; i<axesArray.length; i++){
-        axesArray[i] = INVALID_VALUE
-      }
+      errorFreeData = false
+      return axesDataCounter
     }
 
-    return axesDataCounter
   }
   else{
-    if(checkAxisValue(axisNumber,axisValue) && checkAxesArray(axesArray)){
+    if(axesDataCounter != 7){
+      axesArray[axisNumber-1] = - axisValue
+      return axesDataCounter
+    }
+    else{
       axesArray[axisNumber-1] = axisValue
       storeDistance = calcDistance(axesArray)
       axesDataCounter = 0
       return ALL_DATA_PRESENT
-    }
-    else{
-      axesDataCounter = 0
-      return -1 // data is invalid
     }
   }
 }

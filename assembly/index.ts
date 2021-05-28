@@ -1,15 +1,20 @@
 import { JSONEncoder } from "assemblyscript-json";
-import {calcDistance, getDistance, isCollisionDetected,getTip} from "./collision-detection";
+import {calcDistance, isCollisionDetected,getTip} from "./collision-detection";
 
 //Create a static array for data
 let axisData = new Uint8Array(1024);
 //The length of axis data is 9 bytes
 const AXIS_DATA_LENGTH = 9;
 const AXIS_NUMBER_LENGTH = 4;
-const INVALID_AXIS_VALUE:f64 = 1000000;
-const DUMMY_AXIS_NUMBER = 1;
+const INVALID_VALUE:f64 = 1000000;
+const ALL_DATA_PRESENT = 7;
 //values of axis
-let axesArray:Array<f64> = [0,0,0,0,0,0,0,0]
+let axesArray:Array<f64> = [0,0,0,0,0,0,0]
+let jsonArray:Array<f64> = [0,0,0,0,0,0,0]
+let axesDataCounter = 0
+let axesJsonCounter = 0
+let storeDistance:f64 = 0
+const emptyUint8Array = new Uint8Array(1)
 
 
 export function add(a: i32, b: i32): i32 {
@@ -61,6 +66,17 @@ function checkAxisValue(number:i32, value:f64):bool{
   return isValid;
 }
 
+function checkAxesArray(array:Array<f64>):bool{
+  let isValid = true
+  for(let i = 0; i<array.length; i++){
+    if(array[i]==INVALID_VALUE){
+      isValid = false
+      break;
+    }
+  }
+  return isValid
+}
+
 //1st byte is the id of axes. It returns the value in the JSON format.
 export function JsonEncoderWasm(dataArray:Uint8Array):Uint8Array{
 
@@ -68,51 +84,46 @@ export function JsonEncoderWasm(dataArray:Uint8Array):Uint8Array{
   //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
   let axisValue:f64 = convertNumber(dataArray,5)
 
+  axesJsonCounter++
+
   if(axisNumber<0 || axisNumber>7){
-    let errorArray:Uint8Array = new Uint8Array(1)
-    return errorArray
+    jsonArray[0] = INVALID_VALUE
   }
 
-  if(!checkAxisValue(axisNumber,axisValue)){
-    let errorArray:Uint8Array = new Uint8Array(1)
-    return errorArray
+  if(axesJsonCounter!= 7){
+    if(checkAxisValue(axisNumber,axisValue)){
+      jsonArray[axisNumber-1] = axisValue
+    }
+    else{
+      for(let i=0; i<axesArray.length; i++){
+        jsonArray[i] = INVALID_VALUE
+      }
+    }
+    return emptyUint8Array
   }
+  else{
+    if(checkAxisValue(axisNumber,axisValue) && checkAxesArray(jsonArray)){
+      jsonArray[axisNumber-1] = axisValue
 
-  // Create encoder
-  let encoder = new JSONEncoder()
+      let jsonEncoder = new JSONEncoder()
+      jsonEncoder.pushObject(null)
+      for(let i=0; i<jsonArray.length; i++){
+        jsonEncoder.setString("axis_"+(i+1).toString(),jsonArray[i].toString())
+      }
+      jsonEncoder.popObject()
 
-  encoder.pushObject(null);
-  encoder.setString("axis_number", axisNumber.toString())
-  encoder.setString("axis_value",axisValue.toString())
-  encoder.popObject()
-  let result:Uint8Array = encoder.serialize()
-  return result
+      axesJsonCounter=0
+      let result:Uint8Array = jsonEncoder.serialize()
+      return result
+
+    }
+    else{
+      axesJsonCounter=0
+      return emptyUint8Array
+    }
+  }
 }
 
-/*export function JsonEncoderString(dataArray:Uint8Array):string{
-
-  let axisNumber:i32 = convertNumber(dataArray,0)
-  //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
-  let axisValue: f64 = convertNumber(dataArray, 5)
-
-  if(axisNumber<0 || axisNumber>7){
-    return '0'
-  }
-  if(!checkAxisValue(axisNumber,axisValue)){
-    return '0'
-  }
-
-  // Create encoder
-  let encoder = new JSONEncoder()
-
-  encoder.pushObject(null);
-  encoder.setString("axis_number", axisNumber.toString())
-  encoder.setString("axis_value",axisValue.toString())
-  encoder.popObject()
-  //let result:Uint8Array = encoder.serialize()
-  let result:string = encoder.toString()
-  return result
-}*/
 
 export function setAxisData(dataArray:Uint8Array):i32{
 
@@ -120,9 +131,13 @@ export function setAxisData(dataArray:Uint8Array):i32{
   //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
   let axisValue:f64 = convertNumber(dataArray,5) //For Test
 
+  axesDataCounter++
+
   if(axisNumber<0 || axisNumber>7){
-    axesArray[0] = INVALID_AXIS_VALUE
-    return DUMMY_AXIS_NUMBER
+    for(let i=0; i<axesArray.length; i++){
+      axesArray[i] = INVALID_VALUE
+    }
+    return axesDataCounter
   }
 
   /*
@@ -130,29 +145,34 @@ export function setAxisData(dataArray:Uint8Array):i32{
   It assumes that the robot's base stands on the ground, and the initial position of the tip is positive (on the x-y plane).
   Therefore, the clockwise rotation is negative, the counterclockwise is positive, but KUKA robots outputs the opposite
   */
-  if(axisNumber != 7){
+  if(axesDataCounter != 7){
     if(checkAxisValue(axisNumber,axisValue)){
       axesArray[axisNumber-1] = - axisValue //reverse the sign because of
     }
     else{
-      axesArray[0] = INVALID_AXIS_VALUE // Set invalid sign in first array's element.
+      for(let i=0; i<axesArray.length; i++){
+        axesArray[i] = INVALID_VALUE
+      }
     }
+
+    return axesDataCounter
   }
   else{
-    if(checkAxisValue(axisNumber,axisValue) && axesArray[0]!=INVALID_AXIS_VALUE){
+    if(checkAxisValue(axisNumber,axisValue) && checkAxesArray(axesArray)){
       axesArray[axisNumber-1] = axisValue
-      calcDistance(axesArray)
+      storeDistance = calcDistance(axesArray)
+      axesDataCounter = 0
+      return ALL_DATA_PRESENT
     }
     else{
-      return 0
+      axesDataCounter = 0
+      return -1 // data is invalid
     }
   }
-
-  return axisNumber
 }
 
-export function distance():f64{
-  return getDistance()
+export function getDistance():f64{
+  return storeDistance
 }
 
 export function isUnsafe():bool{

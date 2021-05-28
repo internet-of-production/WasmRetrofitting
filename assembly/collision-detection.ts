@@ -109,7 +109,7 @@ function calcTipCoordinate():Array<f64>{
 }
 
 //This function called if 1-7 axis data are ready
-export function calcDistance(axes:Array<f64>):void {
+export function calcDistance(axes:Array<f64>):f64 {
 
     for (let i = 0; i < 7; i++) {
         setHTMatrix(i+1, (axes[i]*Math.PI)/180)
@@ -118,11 +118,11 @@ export function calcDistance(axes:Array<f64>):void {
     let coordinate:Array<f64> = calcTipCoordinate()
     tip = coordinate.slice(0)
     distance = Math.sqrt(Math.pow(coordinate[0]-objectCoordinate[0],2)+Math.pow(coordinate[1]-objectCoordinate[1],2)+Math.pow(coordinate[2]-objectCoordinate[2],2))
-}
 
-export function getDistance():f64{
     return distance
 }
+
+
 
 /*TODO: Check SAFETY_DISTANCE. According to the previous thesis: D = 1097.2mm + (2472 ms)*max_robot_speed(mm/ms)
 For max_robot_speed = 1 (mm/ms), D = 3569.2 mm

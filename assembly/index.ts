@@ -35,35 +35,25 @@ function convertNumber(dataArray:Uint8Array,offset:i32):i32{
 
 function checkAxisValue(number:i32, value:f64):bool{
 
-  let isValid = false;
   switch (number) {
     case 1:
-      isValid = (-185<=value && value<=185);
-      break;
+      return (-185<=value && value<=185);
     case 2:
-      isValid = (-146<=value && value<=0);
-      break;
+      return (-146<=value && value<=0);
     case 3:
-      isValid = (-119<=value && value<=155);
-      break;
+      return (-119<=value && value<=155);
     case 4:
-      isValid = (-350<=value && value<=350);
-      break;
+      return (-350<=value && value<=350);
     case 5:
-      isValid = (-125<=value && value<=125);
-      break;
+      return (-125<=value && value<=125);
     case 6:
-      isValid = (-350<=value && value<=350);
-      break;
+      return (-350<=value && value<=350);
     case 7: //TODO: Add checking external axis (linear, 7th axis)
-      isValid = true;
-      break;
+      return true;
     default: {
-      break;
+      return false;
     }
   }
-
-  return isValid;
 }
 
 function checkAxesArray(array:Array<f64>):bool{

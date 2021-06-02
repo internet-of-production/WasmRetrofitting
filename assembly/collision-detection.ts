@@ -27,10 +27,14 @@ function setHTMatrix(axisNumber:i32, axisValue:f64):void{
         let raw2:Array<f64> = [0, 1, 0, 0]
         let raw3:Array<f64> = [-Math.sin(axisValue), 0, Math.cos(axisValue), 0]
         let raw4:Array<f64> = [0, 0, 0, 1]
-        T01[0] = raw1.slice(0)
+        /*T01[0] = raw1.slice(0)
         T01[1] = raw2.slice(0)
         T01[2] = raw3.slice(0)
-        T01[3] = raw4.slice(0)
+        T01[3] = raw4.slice(0)*/
+        T01[0] = raw1
+        T01[1] = raw2
+        T01[2] = raw3
+        T01[3] = raw4
     }
     else if(axisNumber == 4){
         //rotation in the x-dimension
@@ -38,10 +42,10 @@ function setHTMatrix(axisNumber:i32, axisValue:f64):void{
         let raw2:Array<f64> = [0, Math.cos(axisValue), -Math.sin(axisValue), posA4fromA3[1]]
         let raw3:Array<f64> = [0, Math.sin(axisValue), Math.cos(axisValue), posA4fromA3[2]]
         let raw4:Array<f64> = [0, 0, 0, 1]
-        T34[0] = raw1.slice(0)
-        T34[1] = raw2.slice(0)
-        T34[2] = raw3.slice(0)
-        T34[3] = raw4.slice(0)
+        T34[0] = raw1
+        T34[1] = raw2
+        T34[2] = raw3
+        T34[3] = raw4
     }
     else {
         //rotation in the z-dimension
@@ -53,26 +57,26 @@ function setHTMatrix(axisNumber:i32, axisValue:f64):void{
             raw1[3] = posA2fromA1[0]
             raw2[3] = posA2fromA1[1]
             raw3[3] = posA2fromA1[2]
-            T12[0] = raw1.slice(0)
-            T12[1] = raw2.slice(0)
-            T12[2] = raw3.slice(0)
-            T12[3] = raw4.slice(0)
+            T12[0] = raw1
+            T12[1] = raw2
+            T12[2] = raw3
+            T12[3] = raw4
         }
         else if(axisNumber == 3){
             raw1[3] = posA3fromA2[0]
             raw2[3] = posA3fromA2[1]
             raw3[3] = posA3fromA2[2]
-            T23[0] = raw1.slice(0)
-            T23[1] = raw2.slice(0)
-            T23[2] = raw3.slice(0)
-            T23[3] = raw4.slice(0)
+            T23[0] = raw1
+            T23[1] = raw2
+            T23[2] = raw3
+            T23[3] = raw4
         }
         else if(axisNumber == 5) {
             //It assumes that A4 and A5 are on the same coordinate.
-            T45[0] = raw1.slice(0)
-            T45[1] = raw2.slice(0)
-            T45[2] = raw3.slice(0)
-            T45[3] = raw4.slice(0)
+            T45[0] = raw1
+            T45[1] = raw2
+            T45[2] = raw3
+            T45[3] = raw4
         }
     }
 }

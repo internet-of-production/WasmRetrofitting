@@ -1,5 +1,6 @@
 const {AsBind} = require("as-bind");
 const fs = require("fs");
+const { performance } = require('perf_hooks');
 
 var KEY = fs.readFileSync(__dirname +'/secret/server.key')
 var CERT = fs.readFileSync(__dirname +'/secret/server.crt')
@@ -95,6 +96,8 @@ const serial_read = function() {
 //MQTT
 const mqtt = require('mqtt')
 const topic = 'KUKA'
+const subTopic = "KUKAAxes/return"
+const rttTopic = "RTT"
 const optionJSON = JSON.parse(getMQTTOptions())
 const options = {
     clientId:optionJSON.clientId,
@@ -114,7 +117,7 @@ const client  = mqtt.connect(options);
 
 //Subscribe the broker
 client.on('connect', function () {
-    client.subscribe(topic, function (err) {
+    client.subscribe(subTopic, function (err) {
         if (!err) {
             console.log('Connected')
         }
@@ -122,12 +125,12 @@ client.on('connect', function () {
 })
 
 //Listening messages from the broker
-client.on('message', function (topic, message) {
+client.on('message', function (subTopic, message) {
     // message is Buffer
-    console.log(message.toString())
     if(message.toString()==='EndConnection'){
         client.end()
     }
+    client.publish(rttTopic, performance.now().toString())
 });
 
 //Display Errors
@@ -143,6 +146,7 @@ const mqtt_publish = function (msg){
     }
     client.publish(topic, 'Test: ')
     client.publish(topic, msg)
+    client.publish("Start", performance.now().toString())
 }
 
 serial_read()

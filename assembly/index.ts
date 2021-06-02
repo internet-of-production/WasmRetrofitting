@@ -59,16 +59,6 @@ function isAxisValueValid(number:i32, value:f64):bool{
   }
 }
 
-function checkAxesArray(array:Array<f64>):bool{
-  let isValid = true
-  for(let i = 0; i<array.length; i++){
-    if(array[i]==INVALID_VALUE){
-      isValid = false
-      break;
-    }
-  }
-  return isValid
-}
 
 //1st byte is the id of axes. It returns the value in the JSON format.
 export function JsonEncoderWasm(dataArray:Uint8Array):Uint8Array{
@@ -84,8 +74,8 @@ export function JsonEncoderWasm(dataArray:Uint8Array):Uint8Array{
   }
 
   let axisNumber:i32 = convertNumber(dataArray,0)
-  //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
-  let axisValue:f64 = convertNumber(dataArray,5)
+  let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
+  //let axisValue:f64 = convertNumber(dataArray,5)
 
   if(axisNumber<1 || axisNumber>7 || !isAxisValueValid(axisNumber,axisValue)){
 
@@ -142,8 +132,8 @@ export function setAxisData(dataArray:Uint8Array):i32{
   }
 
   let axisNumber:i32 = convertNumber(dataArray,0)
-  //let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
-  let axisValue:f64 = convertNumber(dataArray,5) //For Test
+  let axisValue:f64 = convertNumber(dataArray,5)/ 100000.0
+  //let axisValue:f64 = convertNumber(dataArray,5) //For Test
 
 
   if(axisNumber<1 || axisNumber>7 || !isAxisValueValid(axisNumber,axisValue)){

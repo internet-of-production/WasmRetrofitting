@@ -36,6 +36,11 @@ const port = new SerialPort('/dev/cu.usbserial-0001', {
     autoOpen: false
 })
 
+const MEASURE_TIMES = 50
+let startCounter = 0
+let arrivalCounter = 0
+let startTime = new Array(MEASURE_TIMES);
+let arrivalTime = new Array(MEASURE_TIMES);
 
 const serial_read = function() {
     
@@ -72,8 +77,12 @@ const serial_read = function() {
 
         parser.on('data', function (data){
             const dataArray = new Uint8Array(data)
-            const jsonData = JsonEncoderWasm(dataArray)
+            //const jsonData = JsonEncoderWasm(dataArray)
+            let startCalc = performance.now()
             let counter = setAxisData(dataArray)
+            let endCalc = performance.now()
+            client.publish(calcTopic,(endCalc-startCalc).toString())
+
             if(counter == 7){
                 console.log(getDistance())
                 //console.log(isUnsafe())
@@ -83,9 +92,9 @@ const serial_read = function() {
                 console.log('Error: Received data is invalid')
             }
 
-            if(jsonData.length>1){
+            /*if(jsonData.length>1){
                 mqtt_publish(jsonData)
-            }
+            }*/
 
         })
     })
@@ -98,6 +107,7 @@ const mqtt = require('mqtt')
 const topic = 'KUKA'
 const subTopic = "KUKAAxes/return"
 const rttTopic = "RTT"
+const calcTopic = "CALC"
 const optionJSON = JSON.parse(getMQTTOptions())
 const options = {
     clientId:optionJSON.clientId,
@@ -130,7 +140,18 @@ client.on('message', function (subTopic, message) {
     if(message.toString()==='EndConnection'){
         client.end()
     }
-    client.publish(rttTopic, performance.now().toString())
+    if(arrivalCounter<50){
+        arrivalTime[arrivalCounter] = performance.now()
+    }
+    else if(arrivalCounter == 50){
+        let ratency = 0
+        for(let i=0; i<MEASURE_TIMES; i++){
+            ratency = arrivalTime[i]-startTime[i]
+            client.publish(rttTopic,ratency.toString())
+        }
+    }
+    arrivalCounter++
+    //client.publish(rttTopic, performance.now().toString())
 });
 
 //Display Errors
@@ -144,9 +165,13 @@ const mqtt_publish = function (msg){
     if(!client.connected){
         client.reconnect()
     }
-    client.publish(topic, 'Test: ')
+    //client.publish(topic, 'Test: ')
+    if(startCounter<MEASURE_TIMES){
+        startTime[startCounter] = performance.now()
+    }
     client.publish(topic, msg)
-    client.publish("Start", performance.now().toString())
+    startCounter++
+    //client.publish("Start", performance.now().toString())
 }
 
 serial_read()

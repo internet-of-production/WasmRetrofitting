@@ -36,11 +36,9 @@ const port = new SerialPort('/dev/cu.usbserial-0001', {
     autoOpen: false
 })
 
-const MEASURE_TIMES = 50
+const MEASURE_TIMES = 100
 let startCounter = 0
 let arrivalCounter = 0
-let startTime = new Array(MEASURE_TIMES);
-let arrivalTime = new Array(MEASURE_TIMES);
 
 const serial_read = function() {
     
@@ -77,11 +75,12 @@ const serial_read = function() {
 
         parser.on('data', function (data){
             const dataArray = new Uint8Array(data)
-            //const jsonData = JsonEncoderWasm(dataArray)
-            let startCalc = performance.now()
+            const jsonData = JsonEncoderWasm(dataArray)
+            /*let startCalc = performance.now()
             let counter = setAxisData(dataArray)
             let endCalc = performance.now()
             client.publish(calcTopic,(endCalc-startCalc).toString())
+
 
             if(counter == 7){
                 console.log(getDistance())
@@ -90,11 +89,11 @@ const serial_read = function() {
             }
             else if(counter == -1){
                 console.log('Error: Received data is invalid')
-            }
-
-            /*if(jsonData.length>1){
-                mqtt_publish(jsonData)
             }*/
+
+            if(jsonData.length>1){
+                mqtt_publish(jsonData)
+            }
 
         })
     })
@@ -140,18 +139,11 @@ client.on('message', function (subTopic, message) {
     if(message.toString()==='EndConnection'){
         client.end()
     }
-    if(arrivalCounter<50){
-        arrivalTime[arrivalCounter] = performance.now()
-    }
-    else if(arrivalCounter == 50){
-        let ratency = 0
-        for(let i=0; i<MEASURE_TIMES; i++){
-            ratency = arrivalTime[i]-startTime[i]
-            client.publish(rttTopic,ratency.toString())
-        }
+    if(arrivalCounter<MEASURE_TIMES){
+        client.publish('RTTEnd',performance.now().toString())
     }
     arrivalCounter++
-    //client.publish(rttTopic, performance.now().toString())
+
 });
 
 //Display Errors
@@ -167,7 +159,7 @@ const mqtt_publish = function (msg){
     }
     //client.publish(topic, 'Test: ')
     if(startCounter<MEASURE_TIMES){
-        startTime[startCounter] = performance.now()
+        client.publish('RTTStart',performance.now().toString())
     }
     client.publish(topic, msg)
     startCounter++

@@ -19,7 +19,7 @@ let errorFreeJson:bool = true
 let errorFreeData:bool = true
 const emptyUint8Array = new Uint8Array(1)
 
-let mqttOptionJSON:string = "{\"clientId\":\"wasmNode\",\"port\":1883,\"host\":\"localhost\",\"username\":\"wasmretrofitting\",\"password\":\"wasmretrofitting\",\"protocol\": \"mqtt\",\"reconnectPeriod\":1000}"
+let mqttOptionJSON:string = "{\"clientId\":\"wasmNode\",\"port\":8883,\"host\":\"localhost\",\"username\":\"wasmretrofitting\",\"password\":\"wasmretrofitting\",\"protocol\": \"mqtt\",\"reconnectPeriod\":1000}"
 
 export function getMQTTOptions():string{
   return mqttOptionJSON

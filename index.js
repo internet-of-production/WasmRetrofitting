@@ -75,7 +75,11 @@ const serial_read = function() {
 
         parser.on('data', function (data){
             const dataArray = new Uint8Array(data)
+            //let startCalc = performance.now()
+            //console.log(dataArray)
             const jsonData = JsonEncoderWasm(dataArray)
+            //let endCalc = performance.now()
+            //client.publish(calcTopic,(endCalc-startCalc).toString())
             /*let startCalc = performance.now()
             let counter = setAxisData(dataArray)
             let endCalc = performance.now()
@@ -114,9 +118,10 @@ const options = {
     host:optionJSON.host,
     username:optionJSON.username,
     password:optionJSON.password,
-    /*key:KEY,
+    key:KEY,
     cert: CERT,
-    ca: TRUSTED_CA_LIST,*/
+    ca: TRUSTED_CA_LIST,
+    rejectUnauthorized: false,
     protocol: optionJSON.protocol,
     reconnectPeriod:optionJSON.reconnectPeriod
 }

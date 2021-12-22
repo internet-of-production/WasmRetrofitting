@@ -7,8 +7,8 @@
     "test": "node tests",
     "asbuild:untouched": "asc assembly/index.ts --target debug",
     "asbuild:optimized": "asc assembly/index.ts --target release",
-    "asbuild:untouched-bind": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --runtime incremental --exportRuntime --target debug",
-    "asbuild:optimized-bind": "asc ./node_modules/as-bind/lib/assembly/as-bind.ts assembly/index.ts --runtime incremental --exportRuntime --target release",
+    "asbuild:untouched-bind": "asc assembly/index.ts --exportRuntime --transform as-bind --target debug",
+    "asbuild:optimized-bind": "asc assembly/index.ts --exportRuntime --transform as-bind --target release",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",
     "asbuild-bind": "npm run asbuild:untouched-bind && npm run asbuild:optimized-bind"
   },
@@ -23,15 +23,15 @@
   },
   "homepage": "https://github.com/internet-of-production/WasmRetrofittingNode#readme",
   "dependencies": {
-    "@assemblyscript/loader": "^0.18.11",
-    "as-bind": "^0.6.1",
-    "assemblyscript-json": "^1.0.0",
-    "mqtt": "^4.2.6",
-    "serialport": "^9.0.7"
+    "@assemblyscript/loader": "^0.19.22",
+    "as-bind": "^0.8.2",
+    "assemblyscript-json": "^1.1.0",
+    "mqtt": "^4.2.8",
+    "serialport": "^9.2.8"
   },
   "devDependencies": {
-    "@serialport/parser-byte-length": "^9.0.7",
-    "@serialport/parser-ready": "^9.0.7",
-    "assemblyscript": "^0.18.11"
+    "@serialport/parser-byte-length": "^9.2.4",
+    "@serialport/parser-ready": "^9.2.4",
+    "assemblyscript": "^0.19.22"
   }
 }

@@ -1,4 +1,4 @@
-const {AsBind} = require("as-bind");
+const AsBind = require("as-bind/dist/as-bind.cjs.js");
 const fs = require("fs");
 const { performance } = require('perf_hooks');
 
@@ -31,7 +31,7 @@ const getMQTTOptions = require('./index').getMQTTOptions;
 const SerialPort = require('serialport');
 const ByteLength = require('@serialport/parser-byte-length');
 
-const port = new SerialPort('/dev/cu.usbserial-0001', {
+const port = new SerialPort('/dev/cu.usbserial-142120', {
     baudRate: 9600,
     autoOpen: false
 })
@@ -41,7 +41,7 @@ let startCounter = 0
 let arrivalCounter = 0
 
 const serial_read = function() {
-    
+
     port.open(function (err){
         if (err) {
             return console.log('Error opening port: ', err.message)
@@ -95,6 +95,7 @@ const serial_read = function() {
                 console.log('Error: Received data is invalid')
             }*/
 
+            console.log(jsonData.length)
             if(jsonData.length>1){
                 mqtt_publish(jsonData)
             }
@@ -144,10 +145,10 @@ client.on('message', function (subTopic, message) {
     if(message.toString()==='EndConnection'){
         client.end()
     }
-    if(arrivalCounter<MEASURE_TIMES){
+    //if(arrivalCounter<MEASURE_TIMES){
         client.publish('RTTEnd',performance.now().toString())
-    }
-    arrivalCounter++
+    //}
+    //arrivalCounter++
 
 });
 
@@ -163,11 +164,11 @@ const mqtt_publish = function (msg){
         client.reconnect()
     }
     //client.publish(topic, 'Test: ')
-    if(startCounter<MEASURE_TIMES){
+    //if(startCounter<MEASURE_TIMES){
         client.publish('RTTStart',performance.now().toString())
-    }
+    //}
     client.publish(topic, msg)
-    startCounter++
+    //startCounter++
     //client.publish("Start", performance.now().toString())
 }
 

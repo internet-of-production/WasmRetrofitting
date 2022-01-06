@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- https://github.com/AssemblyScript/assemblyscript/tree/main/cli#api -->
+    <script type="text/javascript">
+        function compileAS() {
+            require(["https://cdn.jsdelivr.net/npm/assemblyscript@latest/dist/sdk.js"], ({asc}) => {
+                asc.ready.then(async () => {
+                    console.log("Compile AS source code...");
+                    const SOURCE_CODE = document.getElementById('code').value;
+                    try {
+                        const {text, binary} = asc.compileString(SOURCE_CODE, {
+                            optimizeLevel: 3,
+                            runtime: "stub"
+                        });
+                        console.log(`>>> TEXT >>>\n${text}`);
+                        console.log(`>>> BINARY >>>\n${binary.length} bytes`);
+
+                        // upload file
+                        //const fileInput = document.getElementById('form-upload') ;
+                        const formData = new FormData();
+
+                        const blob = new Blob([binary]);
+                        formData.append('file', blob, "main.wasm");
+
+                        const options = {
+                            method: 'POST',
+                            body: formData,
+                        };
+
+                        fetch('/upload', options);
+                    }
+                    catch (e){
+                        console.log('A compilation error occured.');
+                    }
+
+                });
+            });
+        }
+
+    </script>
+    <style type="text/css">
+        textarea {
+            display: block;
+            width: 80%;
+            height: 500px;
+        }
+        label{
+            display: block;
+        }
+    </style>
+    <title>Retrofitting industrial machines with Wasm</title>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+<h1>Web IDE for the AS program of the edge device (NodeJS+RasPi)</h1>
+<div class="codeArea">
+    <label for="code">AssemblyScript Code</label>
+    <!-- <input type="file"> -->
+    <textarea id="code">
+        export function fib(n: i32): i32 {
+            var a = 0, b = 1
+            if (n > 0) {
+                while (--n) {
+                    let t = a + b
+                    a = b
+                    b = t
+                }
+                return b
+            }
+            return a
+        }
+    </textarea>
+</div>
+<div>
+    <input type="button" value="compile and load" onclick="compileAS()">
+</div>
+</body>
+</html>

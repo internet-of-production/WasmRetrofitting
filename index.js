@@ -24,6 +24,9 @@ const setAxisData = require('./index').setAxisData;
 const getDistance = require('./index').getDistance;
 const isUnsafe = require('./index').isUnsafe;
 const getMQTTOptions = require('./index').getMQTTOptions;
+const convertNumber = require('./index').convertNumber;
+
+const http = require('http')
 
 
 
@@ -72,11 +75,12 @@ const serial_read = function() {
             }
         })
 
-
+// TODO: Wait for STX. Is ETX necessary? Assume that STX=0x02, ETX=0x03. The program for KUKA has to be changed, so that it sends STX (and ETX) with CWRITE.
         parser.on('data', function (data){
             const dataArray = new Uint8Array(data)
             //let startCalc = performance.now()
             //console.log(dataArray)
+            //TODO: Wait for STX. while(convertNumber(dataArray)!=stx){...}. Notice that STX may be different to AXIS's bytes (evtl. We need an another convertNumber function)
             const jsonData = JsonEncoderWasm(dataArray)
             //let endCalc = performance.now()
             //client.publish(calcTopic,(endCalc-startCalc).toString())
@@ -172,4 +176,25 @@ const mqtt_publish = function (msg){
     //client.publish("Start", performance.now().toString())
 }
 
-serial_read()
+//TODO: remove comment out
+//serial_read()
+
+//WebServer
+let server = http.createServer();
+
+server.on('request', function(req, res) {
+    fs.readFile(__dirname + '/ide.html', 'utf-8', function (err, data) {
+        if (err) {
+            res.writeHead(404, {'Content-Type' : 'text/plain'});
+            res.write('page not found');
+            return res.end();
+        }
+
+        res.writeHead(200, {'Content-Type' : 'text/html'});
+        res.write(data);
+        res.end();
+    });
+});
+
+// arguments: port, IP
+server.listen(3000);

@@ -29,10 +29,17 @@
                             body: formData,
                         };
 
-                        fetch('/upload', options);
+                        fetch('/upload', options).then(response => response.json())
+                            .then(data => {
+                                console.log('Success:', data);
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
                     }
-                    catch (e){
-                        console.log('A compilation error occured.');
+                    catch (error){
+                        console.log('A compilation error occured:');
+                        console.log(error)
                     }
 
                 });

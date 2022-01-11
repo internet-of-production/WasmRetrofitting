@@ -1,5 +1,10 @@
 const AsBind = require("as-bind/dist/as-bind.cjs.js");
 const fs = require("fs");
+const express = require("express")
+const bodyParser = require('body-parser');
+const multipart = require('connect-multiparty');
+const multer = require('multer');
+const path = require('path');
 const { performance } = require('perf_hooks');
 
 var KEY = fs.readFileSync(__dirname +'/secret/server.key')
@@ -180,8 +185,62 @@ const mqtt_publish = function (msg){
 //serial_read()
 
 //WebServer
-let server = http.createServer();
+//let server = http.createServer();
+let app = express();
 
+var listener = app.listen(3000, function() {
+
+    console.log(listener.address().port);
+
+});
+
+app.use(express.static('public'));
+
+app.get('/', function(request, response) {
+    response.sendFile(__dirname + '/ide.html');
+});
+
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true }));
+app.use(multipart());
+
+const updir = __dirname + "/build";
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.resolve(__dirname, './build'))
+    },
+    filename: function (req, file, cb) {
+        cb(null, 'main.wasm')
+    }
+})
+
+const upload = multer({storage:storage})
+
+app.post('/upload', upload.single('file'), (request, response)=> {
+    console.log('POST!')
+    console.log('/upload');
+    console.log(request.headers['content-type']);
+    console.log('* body');
+    console.log(request.body);
+    console.log('* files');
+    console.log(request.files);
+    console.log(updir);
+    console.log(request.file, request.body)
+
+});
+
+/*
+app.post('/upload', async (req, res) => {
+    // express.rawにより、
+    // Content-Type: application/octet-streamの場合は
+    // req.bodyにバイナリデータが設定されるのでファイルに出力
+    console.log(req.body);
+    fs.writeFileSync('test.wasm', req.body);
+
+    res.send('ok');
+});*/
+
+/*
 server.on('request', function(req, res) {
     fs.readFile(__dirname + '/ide.html', 'utf-8', function (err, data) {
         if (err) {
@@ -191,10 +250,29 @@ server.on('request', function(req, res) {
         }
 
         res.writeHead(200, {'Content-Type' : 'text/html'});
+
         res.write(data);
         res.end();
     });
+
+    if(req.method=="POST"){
+        req.data = "";
+
+        //receive wasm code
+        req.on("readable", function() {
+            // read() might get null
+            req.data += req.read() || '';
+            console.log('POSTED Wasm')
+            console.log(res.data)
+            fs.writeFile('/build' + req.blob(), req.body.value, function (err) {
+                if (err) { throw err; }
+                console.log('main.wasm is successfully created.');
+            });
+            console.log(req.data);
+        });
+
+    }
 });
 
 // arguments: port, IP
-server.listen(3000);
+server.listen(3000);*/

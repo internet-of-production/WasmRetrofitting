@@ -23,15 +23,15 @@
   },
   "homepage": "https://github.com/internet-of-production/WasmRetrofittingNode#readme",
   "dependencies": {
-    "@assemblyscript/loader": "^0.19.22",
+    "@assemblyscript/loader": "^0.20.13",
     "as-bind": "^0.8.2",
     "assemblyscript-json": "^1.1.0",
-    "mqtt": "^4.2.8",
-    "serialport": "^9.2.8"
+    "mqtt": "^4.3.7",
+    "serialport": "^10.4.0"
   },
   "devDependencies": {
-    "@serialport/parser-byte-length": "^9.2.4",
-    "@serialport/parser-ready": "^9.2.4",
-    "assemblyscript": "^0.19.22"
+    "@serialport/parser-byte-length": "^10.3.0",
+    "@serialport/parser-ready": "^10.3.0",
+    "assemblyscript": "^0.20.13"
   }
 }

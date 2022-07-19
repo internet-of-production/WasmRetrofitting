@@ -28,10 +28,11 @@ const getMQTTOptions = require('./index').getMQTTOptions;
 
 
 
-const SerialPort = require('serialport');
-const ByteLength = require('@serialport/parser-byte-length');
+const { SerialPort } = require('serialport');
+const { ByteLengthParser } = require('@serialport/parser-byte-length')
 
-const port = new SerialPort('/dev/cu.usbserial-142120', {
+const port = new SerialPort({
+    path:'/dev/cu.usbserial-0001',
     baudRate: 9600,
     autoOpen: false
 })
@@ -59,7 +60,7 @@ const serial_read = function() {
     First 4 Bytes are for the number of the axis. 5th Byte is for the sign(positiv, negativ), and the remains are for the axis in degrees.
     */
     //TODO: Check the order of bytes from KUKA (e.g. LITTLE_ENDIAN)
-    const parser = port.pipe(new ByteLength({length:9}))
+    const parser = port.pipe(new ByteLengthParser({length:9}))
 
     /*
     * Buffer must be flushed once, because some bytes are already written after opening ports.
